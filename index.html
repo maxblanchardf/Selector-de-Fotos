@@ -505,7 +505,7 @@ body.drag-on { outline: 3px dashed var(--blue); outline-offset: -3px; }
   </div>
 
   <div class="h-actions">
-    <button class="btn icon-only" onclick="openConfig()" title="Configuración Dropbox / Monday" id="cfg-btn">⚙️</button>
+    <button class="btn icon-only" onclick="openConfig()" title="Configuración Dropbox / Monday">⚙️</button>
     <button class="btn" onclick="openGenSession()" title="Generar HTML para cliente">📤 Generar sesión</button>
     <button class="btn primary" onclick="openExport()">⬇ Exportar</button>
     <button class="btn no sm" onclick="clearAll()">✕ Limpiar</button>
@@ -624,61 +624,28 @@ body.drag-on { outline: 3px dashed var(--blue); outline-offset: -3px; }
 
 <!-- CONFIG MODAL -->
 <div class="mo-bg" id="cfg-mo" onclick="moBg('cfg-mo',event)">
-  <div class="mo" style="max-width:520px">
+  <div class="mo">
     <h3>⚙️ Configuración</h3>
-    <div class="mo-sub">Tokens y parámetros de Monday. Se guardan solo en este navegador.</div>
+    <div class="mo-sub">Tokens para conectar Dropbox y Monday. Se guardan solo en este navegador.</div>
     <div class="mo-form">
       <div>
         <label>Dropbox Access Token</label>
-        <input id="cfg-dbx" type="text" placeholder="sl.XXXXXXX…  (Dropbox App Console)" autocomplete="off" spellcheck="false" style="font-family:monospace;font-size:11px;">
+        <input id="cfg-dbx" type="text" autocomplete="off" spellcheck="false" style="font-family:monospace;font-size:11px;" placeholder="sl.XXXXXXX…  (Dropbox App Console)">
       </div>
       <div>
         <label>Monday API Token (v2)</label>
-        <input id="cfg-mon" type="text" placeholder="eyJhbGci… (Monday → Mi perfil → API)" autocomplete="off" spellcheck="false" style="font-family:monospace;font-size:11px;">
+        <input id="cfg-mon" type="text" autocomplete="off" spellcheck="false" style="font-family:monospace;font-size:11px;" placeholder="eyJhbGci… (Monday → Mi perfil → API)">
       </div>
       <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px">
         <label style="color:var(--blue);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px">Monday — Tablero destino</label>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
-          <div>
-            <label>Board ID</label>
-            <input id="cfg-bid" type="text" placeholder="7904703928">
-          </div>
-          <div>
-            <label>Group ID</label>
-            <input id="cfg-gid" type="text" placeholder="group_mky0s7yg">
-          </div>
+          <div><label>Board ID</label><input id="cfg-bid" type="text" placeholder="7904703928"></div>
+          <div><label>Group ID</label><input id="cfg-gid" type="text" placeholder="group_mky0s7yg"></div>
         </div>
-        <div style="margin-top:8px">
-          <label>Columna Fecha (column ID)</label>
-          <input id="cfg-col-date" type="text" placeholder="fecha2">
-        </div>
-      </div>
-      <div id="trigger-section" style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px;display:none">
-        <label style="color:var(--blue);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px">🔗 URL Disparadora (para poner en Monday)</label>
-        <div class="mo-hint" style="margin-bottom:8px">Copia esta URL y pégala en una columna de tipo "Enlace" en tu ítem de Monday. Al hacer clic abrirá la app con los datos del cliente precargados.</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-          <div>
-            <label>Cliente (nombre)</label>
-            <input id="trig-client" type="text" placeholder="Ej: Humana">
-          </div>
-          <div>
-            <label>Sesión (nombre)</label>
-            <input id="trig-session" type="text" placeholder="Ej: Colección verano 2025">
-          </div>
-        </div>
-        <div style="margin-bottom:8px">
-          <label>Fecha</label>
-          <input id="trig-date" type="date">
-        </div>
-        <div id="trig-url-box" style="display:none;padding:8px 10px;background:var(--surface3);border-radius:6px;font-size:11px;font-family:monospace;color:var(--muted);word-break:break-all;margin-bottom:8px;line-height:1.6"></div>
-        <div style="display:flex;gap:8px">
-          <button class="btn" style="flex:1;justify-content:center" onclick="genTriggerUrl()">🔗 Generar URL</button>
-          <button class="btn primary" id="copy-trig-btn" style="flex:1;justify-content:center;display:none" onclick="copyTriggerUrl()">📋 Copiar URL</button>
-        </div>
+        <div style="margin-top:8px"><label>Columna Fecha</label><input id="cfg-col-date" type="text" placeholder="fecha2"></div>
       </div>
     </div>
     <div class="mo-acts">
-      <button class="btn" onclick="toggleTriggerSection()">🔗 Generar URL disparadora</button>
       <button class="btn" onclick="closeMo('cfg-mo')">Cancelar</button>
       <button class="btn primary" onclick="saveCfg()">Guardar</button>
     </div>
@@ -1245,41 +1212,17 @@ function toast(msg, dur) {
 document.getElementById('ff').valueAsDate = new Date();
 renderAll();
 
-// ── Auto-fill from URL params (trigger desde Monday) ──────────────────
-(function autoFillFromUrl() {
-  const p = new URLSearchParams(window.location.search);
-  if (p.get('c')) { document.getElementById('fc').value = p.get('c'); }
-  if (p.get('n')) { document.getElementById('fn').value = p.get('n'); }
-  if (p.get('f')) { document.getElementById('ff').value = p.get('f'); }
-  if (p.get('c') || p.get('n') || p.get('f')) { updSess(); }
-})();
-
 // ────────────────────────────────────────────
 // CONFIG (localStorage)
 // ────────────────────────────────────────────
 let cfg = { dbx: '', mon: '', mondayBoardId: '7904703928', mondayGroupId: 'group_mky0s7yg', mondayColDate: 'fecha2' };
 (function loadCfg() {
   try {
-    const saved = JSON.parse(localStorage.getItem('fse-cfg') || '{}');
-    Object.assign(cfg, saved);
-    // Defaults para tablero Prog. Casa Estudio
+    Object.assign(cfg, JSON.parse(localStorage.getItem('fse-cfg') || '{}'));
     if (!cfg.mondayBoardId) cfg.mondayBoardId = '7904703928';
     if (!cfg.mondayGroupId) cfg.mondayGroupId = 'group_mky0s7yg';
     if (!cfg.mondayColDate) cfg.mondayColDate = 'fecha2';
   } catch(e) {}
-  // Mostrar estado de tokens en el título del botón
-  setTimeout(() => {
-    const btn = document.getElementById('cfg-btn');
-    if (btn) {
-      if (cfg.dbx && cfg.mon) {
-        btn.title = 'Configuración — tokens guardados ✓';
-        btn.style.outline = '2px solid #00c875';
-        btn.style.outlineOffset = '2px';
-      } else {
-        btn.title = 'Configuración — tokens pendientes';
-      }
-    }
-  }, 200);
 })();
 
 function openConfig() {
@@ -1288,8 +1231,6 @@ function openConfig() {
   document.getElementById('cfg-bid').value = cfg.mondayBoardId || '7904703928';
   document.getElementById('cfg-gid').value = cfg.mondayGroupId || 'group_mky0s7yg';
   document.getElementById('cfg-col-date').value = cfg.mondayColDate || 'fecha2';
-  const ts = document.getElementById('trigger-section');
-  if (ts) ts.style.display = 'none';
   openMo('cfg-mo');
 }
 
@@ -1300,47 +1241,8 @@ function saveCfg() {
   cfg.mondayGroupId = document.getElementById('cfg-gid').value.trim() || 'group_mky0s7yg';
   cfg.mondayColDate = document.getElementById('cfg-col-date').value.trim() || 'fecha2';
   localStorage.setItem('fse-cfg', JSON.stringify(cfg));
-  const cfgBtn = document.getElementById('cfg-btn');
-  if (cfgBtn) {
-    if (cfg.dbx && cfg.mon) {
-      cfgBtn.title = 'Configuración — tokens guardados ✓';
-      cfgBtn.style.outline = '2px solid #00c875';
-      cfgBtn.style.outlineOffset = '2px';
-    } else {
-      cfgBtn.title = 'Configuración — tokens pendientes';
-      cfgBtn.style.outline = '';
-    }
-  }
   toast('Configuración guardada ✓');
   closeMo('cfg-mo');
-}
-
-function toggleTriggerSection() {
-  const sec = document.getElementById('trigger-section');
-  sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
-  document.getElementById('trig-date').valueAsDate = new Date();
-}
-
-function genTriggerUrl() {
-  const client  = document.getElementById('trig-client').value.trim();
-  const session = document.getElementById('trig-session').value.trim();
-  const date    = document.getElementById('trig-date').value.trim();
-  if (!client && !session) { toast('Ingresa al menos cliente o sesión'); return; }
-  // Build a URL with query params that auto-fill the app on open
-  const base = window.location.href.split('?')[0];
-  const params = new URLSearchParams();
-  if (client)  params.set('c', client);
-  if (session) params.set('n', session);
-  if (date)    params.set('f', date);
-  const url = base + '?' + params.toString();
-  document.getElementById('trig-url-box').textContent = url;
-  document.getElementById('trig-url-box').style.display = 'block';
-  document.getElementById('copy-trig-btn').style.display = '';
-}
-
-function copyTriggerUrl() {
-  const url = document.getElementById('trig-url-box').textContent;
-  navigator.clipboard.writeText(url).then(() => toast('URL copiada al portapapeles ✓'));
 }
 
 // ────────────────────────────────────────────
@@ -1430,11 +1332,10 @@ async function navDbx(path) {
 
   // Breadcrumb
   const parts = path ? path.split('/') : [];
-  let crumbs = `<span class="dbx-bclink" data-path="" onclick="navDbx(this.dataset.path)">📦 Raíz</span>`;
+  let crumbs = `<span class="dbx-bclink" onclick="navDbx('')">📦 Raíz</span>`;
   parts.forEach((seg, i) => {
     const p = parts.slice(0, i + 1).join('/');
-    const safeP = p.replace(/"/g, '&quot;');
-    crumbs += ` <span style="color:var(--border);flex-shrink:0">›</span> <span class="dbx-bclink" data-path="${safeP}" onclick="navDbx(this.dataset.path)">${escHtml(seg)}</span>`;
+    crumbs += ` <span style="color:var(--border);flex-shrink:0">›</span> <span class="dbx-bclink" onclick="navDbx(${escHtml(JSON.stringify(p))})">${escHtml(seg)}</span>`;
   });
   bread.innerHTML = crumbs;
   label.textContent = path || '(raíz de Dropbox)';
@@ -1475,8 +1376,7 @@ async function navDbx(path) {
 
     list.innerHTML = folders.map(f => {
       const fp = path ? path + '/' + f.name : f.name;
-      const safeFp = fp.replace(/"/g, '&quot;');
-      return `<div class="dbx-fi" data-path="${safeFp}" onclick="navDbx(this.dataset.path)">📁 <span style="flex:1">${escHtml(f.name)}</span><span style="color:var(--muted);font-size:11px">›</span></div>`;
+      return `<div class="dbx-fi" onclick="navDbx(${escHtml(JSON.stringify(fp))})">📁 <span style="flex:1">${escHtml(f.name)}</span><span style="color:var(--muted);font-size:11px">›</span></div>`;
     }).join('');
 
   } catch(e) {
@@ -1668,52 +1568,46 @@ async function startGenerateSession() {
 
   if (errCount) toast(`⚠️ ${errCount} fotos sin URL: ${firstError}`);
 
-  const html = buildClientHtml(photoData, {...sess}, cfg.mon);
+  const html = buildClientHtml(photoData, {...sess, mondayBoardId: cfg.mondayBoardId, mondayGroupId: cfg.mondayGroupId, mondayColDate: cfg.mondayColDate}, cfg.mon);
   const safeName = (sess.n || sess.c || 'sesion').replace(/[^a-zA-Z0-9_\-]/g, '-').toLowerCase();
-  const fileName = `cliente-${safeName}.html`;
+  const fileName = 'cliente-' + safeName + '.html';
   dlText(html, fileName, 'text/html');
 
-  let dbxShareUrl = null;
+  let dbxUrl = null;
 
-  // ── Subir HTML a Dropbox ─────────────────────────────────────────
+  // Subir a Dropbox
   if (cfg.dbx) {
-    progTxt.textContent = '📤 Subiendo HTML a Dropbox…';
+    progTxt.textContent = '📤 Subiendo a Dropbox…';
     try {
-      dbxShareUrl = await uploadHtmlToDropbox(html, fileName);
-      progTxt.textContent = `✓ HTML subido a Dropbox ✓`;
-      toast(`✓ HTML subido a Dropbox`);
+      dbxUrl = await uploadHtmlToDropbox(html, fileName);
+      toast('✓ Subido a Dropbox');
     } catch(e) {
-      progTxt.textContent = `✓ HTML generado (Dropbox: ${e.message})`;
-      toast(`HTML listo · Error Dropbox: ${e.message}`, 5000);
+      toast('Dropbox: ' + e.message, 5000);
     }
   }
 
-  // ── Crear ítem en Monday y adjuntar el HTML ──────────────────────
+  // Crear ítem en Monday
   if (cfg.mon) {
     progTxt.textContent = '📋 Creando ítem en Monday…';
     try {
-      await createMondaySessionItem(html, fileName, {...sess}, dbxShareUrl);
-      progTxt.textContent = `✓ Listo — ${photoData.length} fotos · Dropbox ✓ · Monday ✓`;
-      toast(`✓ HTML en Dropbox e ítem creado en Monday`);
+      await createMondaySessionItem(fileName, {...sess}, dbxUrl);
+      toast('✓ Ítem creado en Monday');
     } catch(e) {
-      progTxt.textContent = `✓ HTML listo${dbxShareUrl ? ' · Dropbox ✓' : ''} (Monday: ${e.message})`;
-      toast(`HTML listo · Error Monday: ${e.message}`, 5000);
+      toast('Monday: ' + e.message, 5000);
     }
-  } else {
-    progTxt.textContent = `✓ Listo — ${photoData.length} fotos${dbxShareUrl ? ' · Dropbox ✓' : ''}`;
-    toast(`HTML generado con ${photoData.length} fotos`);
   }
 
-  // ── Mostrar link de Dropbox si existe ────────────────────────────
-  if (dbxShareUrl) {
+  // Mostrar link de Dropbox
+  if (dbxUrl) {
     const linkBox = document.createElement('div');
     linkBox.style.cssText = 'margin-top:10px;padding:10px 12px;background:var(--surface3);border-radius:6px;border:1px solid var(--border);font-size:12px;';
-    linkBox.innerHTML = `<div style="color:var(--muted);margin-bottom:6px;">🔗 Link para el cliente:</div>
-      <a href="${dbxShareUrl}" target="_blank" style="color:var(--blue);word-break:break-all;">${dbxShareUrl}</a>
-      <button onclick="navigator.clipboard.writeText('${dbxShareUrl}');toast('✓ Link copiado')" style="margin-left:8px;padding:3px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:11px;">📋 Copiar</button>`;
+    linkBox.innerHTML = '<div style="color:var(--muted);margin-bottom:6px;">🔗 Link para el cliente:</div>' +
+      '<a href="' + dbxUrl + '" target="_blank" style="color:var(--blue);word-break:break-all;">' + dbxUrl + '</a>' +
+      '<button onclick="navigator.clipboard.writeText(' + "'" + dbxUrl + "'" + ');toast(' + "'✓ Copiado')" + '" style="margin-left:8px;padding:3px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);cursor:pointer;font-size:11px;">📋 Copiar</button>';
     progWrap.appendChild(linkBox);
   }
 
+  progTxt.textContent = '✓ Listo — ' + photoData.length + ' fotos' + (dbxUrl ? ' · Dropbox ✓' : '') + (cfg.mon ? ' · Monday ✓' : '');
   genBtn.disabled = false;
   genBtn.textContent = '✓ Descargado';
   cancelBtn.disabled = false;
@@ -1721,21 +1615,14 @@ async function startGenerateSession() {
 }
 
 // ────────────────────────────────────────────
-// CREATE MONDAY ITEM + ATTACH HTML
-// ────────────────────────────────────────────
-
-// ────────────────────────────────────────────
 // UPLOAD HTML TO DROPBOX
 // ────────────────────────────────────────────
 async function uploadHtmlToDropbox(htmlContent, fileName) {
-  const folder = '/Archivos Clientes';
-  const dbxPath = folder + '/' + fileName;
-
-  // 1. Subir el archivo
+  const dbxPath = '/Archivos Clientes/' + fileName;
   const uploadResp = await fetch('https://content.dropboxapi.com/2/files/upload', {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${cfg.dbx}`,
+      'Authorization': 'Bearer ' + cfg.dbx,
       'Content-Type': 'application/octet-stream',
       'Dropbox-API-Arg': JSON.stringify({ path: dbxPath, mode: 'overwrite', autorename: false, mute: false })
     },
@@ -1744,90 +1631,66 @@ async function uploadHtmlToDropbox(htmlContent, fileName) {
   const uploadData = await uploadResp.json();
   if (uploadData.error_summary) throw new Error(uploadData.error_summary);
 
-  // 2. Crear link compartido (o reusar si ya existe)
   let shareResp = await fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${cfg.dbx}`, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + cfg.dbx, 'Content-Type': 'application/json' },
     body: JSON.stringify({ path: dbxPath, settings: { requested_visibility: 'public' } })
   });
   let shareData = await shareResp.json();
 
-  // Si ya existe un link, recuperarlo
   if (shareData.error_summary && shareData.error_summary.includes('shared_link_already_exists')) {
     const listResp = await fetch('https://api.dropboxapi.com/2/sharing/list_shared_links', {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${cfg.dbx}`, 'Content-Type': 'application/json' },
+      headers: { 'Authorization': 'Bearer ' + cfg.dbx, 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: dbxPath, direct_only: true })
     });
     const listData = await listResp.json();
-    shareData = listData.links?.[0];
+    shareData = listData.links && listData.links[0];
   }
-
-  if (!shareData?.url) throw new Error('No se pudo obtener el link de Dropbox');
+  if (!shareData || !shareData.url) throw new Error('No se pudo obtener el link de Dropbox');
   return shareData.url;
 }
 
-async function createMondaySessionItem(htmlContent, fileName, sessionData, dbxShareUrl = null) {
+// ────────────────────────────────────────────
+// CREATE MONDAY ITEM
+// ────────────────────────────────────────────
+async function createMondaySessionItem(fileName, sessionData, dbxShareUrl) {
   const boardId = cfg.mondayBoardId || '7904703928';
   const groupId = cfg.mondayGroupId || 'group_mky0s7yg';
-  const colDate = cfg.mondayColDate || 'fecha2';
-  const token   = cfg.mon;
-  const headers = { 'Authorization': token, 'Content-Type': 'application/json', 'API-Version': '2024-01' };
+  const colDate  = cfg.mondayColDate || 'fecha2';
+  const headers  = { 'Authorization': cfg.mon, 'Content-Type': 'application/json', 'API-Version': '2024-01' };
 
-  // 1. Crear ítem
   const colVals = {};
   if (sessionData.f) colVals[colDate] = { date: sessionData.f };
 
   const r1 = await fetch('https://api.monday.com/v2', {
     method: 'POST', headers,
     body: JSON.stringify({
-      query: `mutation($bid:ID!,$gid:String!,$nm:String!,$cv:JSON!){
-        create_item(board_id:$bid,group_id:$gid,item_name:$nm,column_values:$cv){id}
-      }`,
-      variables: {
-        bid: boardId, gid: groupId,
-        nm: sessionData.c || sessionData.n || 'Sesión',
-        cv: JSON.stringify(colVals)
-      }
+      query: 'mutation($bid:ID!,$gid:String!,$nm:String!,$cv:JSON!){create_item(board_id:$bid,group_id:$gid,item_name:$nm,column_values:$cv){id}}',
+      variables: { bid: boardId, gid: groupId, nm: sessionData.c || sessionData.n || 'Sesión', cv: JSON.stringify(colVals) }
     })
   });
   const d1 = await r1.json();
-  const itemId = d1?.data?.create_item?.id;
+  const itemId = d1 && d1.data && d1.data.create_item && d1.data.create_item.id;
   if (!itemId) throw new Error('No se pudo crear el ítem (' + JSON.stringify(d1.errors || d1) + ')');
 
-  // 2. Crear update con resumen
-  const nSel = (JSON.parse(htmlContent.match(/const ALL_PHOTOS = (\[[\s\S]*?\]);/)?.[1] || '[]')
-    .filter(p => p.selected)).length;
-  const body = `📸 Sesión generada: ${sessionData.n || '—'}\nCliente: ${sessionData.c || '—'}\nFecha: ${sessionData.f || '—'}\n${dbxShareUrl ? '🔗 Link Dropbox: ' + dbxShareUrl : '🔗 HTML adjunto listo para enviar al cliente.'}`;
+  const body = '📸 Sesión: ' + (sessionData.n || '—') + '\nCliente: ' + (sessionData.c || '—') + '\nFecha: ' + (sessionData.f || '—') + (dbxShareUrl ? '\n\n🔗 Link Dropbox: ' + dbxShareUrl : '');
   await fetch('https://api.monday.com/v2', {
     method: 'POST', headers,
     body: JSON.stringify({
-      query: `mutation($iid:ID!,$body:String!){create_update(item_id:$iid,body:$body){id}}`,
+      query: 'mutation($iid:ID!,$body:String!){create_update(item_id:$iid,body:$body){id}}',
       variables: { iid: itemId, body }
     })
   });
-
-  // 3. Adjuntar el archivo HTML al ítem
-  const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
-  const form = new FormData();
-  form.append('query', `mutation($file:File!){add_file_to_column(item_id:${itemId},column_id:"files",file:$file){id}}`);
-  form.append('variables[file]', htmlBlob, fileName);
-  await fetch('https://api.monday.com/v2/file', {
-    method: 'POST',
-    headers: { 'Authorization': token, 'API-Version': '2024-01' },
-    body: form
-  });
-
-  return itemId;
 }
 
 // ────────────────────────────────────────────
 // BUILD CLIENT HTML
 // ────────────────────────────────────────────
 function buildClientHtml(photoData, sessionData, mondayToken) {
-  const BOARD_ID = cfg.mondayBoardId || '7904703928';
-  const GROUP_ID = cfg.mondayGroupId || 'group_mky0s7yg';
-  const COL_DATE = cfg.mondayColDate || 'fecha2';
+  const BOARD_ID = sessionData.mondayBoardId || '7904703928';
+  const GROUP_ID = sessionData.mondayGroupId || 'group_mky0s7yg';
+  const COL_DATE = sessionData.mondayColDate || 'fecha2';
 
   // Item name = nombre del cliente
   const ITEM_NAME_FIELD = sessionData.c || 'Cliente';
